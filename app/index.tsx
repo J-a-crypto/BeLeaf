@@ -9,6 +9,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
+      <Text>HEllo</Text>
       <Text>Edit app/index.tsx to edit this screen.</Text>
     </View>
   );
