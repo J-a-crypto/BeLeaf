@@ -21,6 +21,19 @@ const LandingPage = ({ navigation }) => {
                         <Text style={styles.buttonText}>Reading Function</Text>
                     </ImageBackground>
                 </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => navigation.navigate('timer')}
+                >
+                    <ImageBackground
+                        source={require('@/assets/images/timericon.png')}
+                        resizeMode="contain"
+                        style={styles.buttonImage}
+                    >
+                        <Text style={styles.buttonText}>Timer</Text>
+                    </ImageBackground>
+                </TouchableOpacity>/..
             </View>
         </ScrollView>
     );

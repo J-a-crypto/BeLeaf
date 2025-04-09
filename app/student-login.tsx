@@ -7,20 +7,20 @@ const StudentLoginScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Student Login</Text>
-        
+
         <TextInput
           style={styles.input}
           placeholder="Email"
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        
+
         <TextInput
           style={styles.input}
           placeholder="Password"
           secureTextEntry
         />
-        
+
         <TouchableOpacity style={styles.recoverButton}>
           <Text style={styles.recoverText}>Forgot Password?</Text>
         </TouchableOpacity>
