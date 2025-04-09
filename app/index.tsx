@@ -26,7 +26,8 @@ export default function App() {
       }
       stopCountDown();
     }
-  }, [timerCount]);
+  }, 
+  [timerCount]);
 
   const startCountDown = () => {
     setIsTimerRunning(true);
