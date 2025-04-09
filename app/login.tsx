@@ -20,7 +20,7 @@ const LoginScreen = () => {
     }
 
     // Simulate successful login and navigate to the landing page
-    router.push('/land'); // Replace with your actual landing page route
+    router.push('/land'); // Ensure the 'land.js' file is correctly placed in your project structure under the pages or routes folder
   };
 
   return (
