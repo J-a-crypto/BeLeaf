@@ -20,7 +20,7 @@ const LoginScreen = () => {
     }
 
     // Simulate successful login and navigate to the landing page
-    router.push('/landing'); // Replace with your actual landing page route
+    router.push('/land'); // Replace with your actual landing page route
   };
 
   return (
