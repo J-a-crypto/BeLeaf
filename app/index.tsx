@@ -10,7 +10,7 @@ const App = () => {
       {/* Header with Login Button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push('/login')}>
-          <Text style={styles.loginText}>Log in</Text>
+          <Text style={styles.loginText}>Log iiiiin</Text>
         </TouchableOpacity>
       </View>
 
