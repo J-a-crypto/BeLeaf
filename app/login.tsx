@@ -1,26 +1,42 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from './configuration';
 
 const LoginScreen = () => {
   const { role } = useLocalSearchParams<{ role: string }>();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const title = role ? `${role.charAt(0).toUpperCase() + role.slice(1)} Login` : 'Login';
 
   // Handle login action
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (email === '' || password === '') {
-      alert('Please enter both email and password.');
+      Alert.alert('Error', 'Please enter both email and password.');
       return;
     }
 
-    // Simulate successful login and navigate to the landing page
-    router.push('/land'); // Ensure the 'land.js' file is correctly placed in your project structure under the pages or routes folder
+    try {
+      setLoading(true);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      router.replace('/(app)/land');
+    } catch (error: any) {
+      let errorMessage = 'An error occurred during login.';
+      if (error.code === 'auth/invalid-credential') {
+        errorMessage = 'Invalid email or password.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      }
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,6 +51,7 @@ const LoginScreen = () => {
           autoCapitalize="none"
           value={email}
           onChangeText={setEmail}
+          editable={!loading}
         />
 
         <View style={styles.passwordContainer}>
@@ -44,10 +61,12 @@ const LoginScreen = () => {
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={setPassword}
+            editable={!loading}
           />
           <TouchableOpacity
             style={styles.eyeIcon}
             onPress={() => setShowPassword(!showPassword)}
+            disabled={loading}
           >
             <Ionicons
               name={showPassword ? "eye-outline" : "eye-off-outline"}
@@ -57,8 +76,16 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Continue</Text>
+        <TouchableOpacity 
+          style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.loginButtonText}>Continue</Text>
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -97,6 +124,9 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 15,
+  },
+  loginButtonDisabled: {
+    opacity: 0.7,
   },
   loginButtonText: {
     color: '#ffffff',

@@ -1,16 +1,26 @@
 // Import the necessary Firebase modules
 import { initializeApp } from "firebase/app";
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Your Firebase config here
 const firebaseConfig = {
-  apiKey: "AIzaSyBuuVNmWZW4FwAfpgW3LpXtx56-S90F850",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "beleaf-e9b79",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyAOpBC_2jEJgFHfqa7VatpPEqWTY5NzAb0",
+  authDomain: "beleaf-a5dff.firebaseapp.com",
+  projectId: "beleaf-a5dff",
+  storageBucket: "beleaf-a5dff.firebasestorage.app",
+  messagingSenderId: "373664710924",
+  appId: "1:373664710924:web:83f525e2683d5501bf4929",
+  measurementId: "G-QQ8REM5QWH"
 };
 
 // Initialize Firebase
-const cong = initializeApp(firebaseConfig);
-export default cong;
+const app = initializeApp(firebaseConfig);
+
+// Initialize Auth with AsyncStorage persistence
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
+
+export { auth };
+export default app;
