@@ -1,20 +1,24 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import { useRouter, Link } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 const App = () => {
   const router = useRouter();
 
+  const handleNavigation = (role?: string) => {
+    if (role) {
+      router.push({
+        pathname: '/login',
+        params: { role }
+      });
+    } else {
+      router.push('/login' as any);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Login Button */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/login')}>
-          <Text style={styles.loginText}>Log In</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Main Content */}
       <View style={styles.hero}>
         <Image 
@@ -25,36 +29,36 @@ const App = () => {
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
             style={styles.button}
-            onPress={() => router.push('/login?role=parent')}
+            onPress={() => handleNavigation('parent')}
           >
             <View style={styles.buttonContent}>
               <Image 
                 source={require('./assets/ParentCAT.png')}
-         
+                style={styles.buttonLogo}
               />
               <Text style={styles.buttonText}>I'm a Parent</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.button}
-            onPress={() => router.push('/login?role=teacher')}
+            onPress={() => handleNavigation('teacher')}
           >
             <View style={styles.buttonContent}>
               <Image 
-                source={require('./assets/TeacherCAT.png')} 
-              
+                source={require('./assets/TeacherCAT.png')}
+                style={styles.buttonLogo}
               />
               <Text style={styles.buttonText}>I'm a Teacher</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.button}
-            onPress={() => router.push('/login?role=student')}
+            onPress={() => handleNavigation('student')}
           >
             <View style={styles.buttonContent}>
               <Image 
                 source={require('./assets/StudentCAT.png')}
-      
+                style={styles.buttonLogo}
               />
               <Text style={styles.buttonText}>I'm a Student</Text>
             </View>
@@ -65,21 +69,22 @@ const App = () => {
   );
 };
 
-const styles = StyleSheet.create({
+interface Styles {
+  container: ViewStyle;
+  hero: ViewStyle;
+  title: TextStyle;
+  buttonContainer: ViewStyle;
+  button: ViewStyle;
+  buttonContent: ViewStyle;
+  buttonText: TextStyle;
+  buttonLogo: ImageStyle;
+  mainLogo: ImageStyle;
+}
+
+const styles = StyleSheet.create<Styles>({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    padding: 20,
-    backgroundColor: '#ffffff',
-  },
-  loginText: {
-    color: '#4020b8',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   hero: {
     flex: 1,
