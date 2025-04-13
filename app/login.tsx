@@ -1,31 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './configuration';
 
 const LoginScreen = () => {
-  const { role } = useLocalSearchParams<{ role: string }>();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const title = role ? `${role.charAt(0).toUpperCase() + role.slice(1)} Login` : 'Login';
-
-  // Handle login action
   const handleLogin = async () => {
-    if (email === '' || password === '') {
-      Alert.alert('Error', 'Please enter both email and password.');
-      return;
-    }
-
     try {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      router.replace('/(app)/land');
+      router.replace({ pathname: 'land' } as any);
     } catch (error: any) {
       let errorMessage = 'An error occurred during login.';
       if (error.code === 'auth/invalid-credential') {
@@ -33,7 +24,7 @@ const LoginScreen = () => {
       } else if (error.code === 'auth/invalid-email') {
         errorMessage = 'Please enter a valid email address.';
       }
-      Alert.alert('Error', errorMessage);
+      console.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -41,12 +32,19 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Stack.Screen 
+        options={{
+          title: "Log in",
+          headerTitleAlign: 'center',
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: '#f4f4f9' }
+        }}
+      />
       <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-
         <TextInput
           style={styles.input}
           placeholder="Email"
+          placeholderTextColor="#A0A0A0"
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}
@@ -56,8 +54,9 @@ const LoginScreen = () => {
 
         <View style={styles.passwordContainer}>
           <TextInput
-            style={styles.passwordInput}
+            style={styles.input}
             placeholder="Password"
+            placeholderTextColor="#A0A0A0"
             secureTextEntry={!showPassword}
             value={password}
             onChangeText={setPassword}
@@ -71,7 +70,7 @@ const LoginScreen = () => {
             <Ionicons
               name={showPassword ? "eye-outline" : "eye-off-outline"}
               size={24}
-              color="#666"
+              color="#A0A0A0"
             />
           </TouchableOpacity>
         </View>
@@ -87,6 +86,34 @@ const LoginScreen = () => {
             <Text style={styles.loginButtonText}>Continue</Text>
           )}
         </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push({ pathname: 'forgot-password' } as any)}>
+          <Text style={styles.forgotPassword}>Forgot your password?</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push({ pathname: 'signup' } as any)}>
+          <Text style={styles.signUpLink}>
+            Don't have an account? <Text style={styles.signUpText}>Sign up</Text>
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text style={styles.orText}>OR</Text>
+          <View style={styles.divider} />
+        </View>
+
+        <TouchableOpacity style={styles.socialButton}>
+          <View style={styles.socialButtonContent}>
+            <Text style={styles.socialButtonText}>Continue with Google</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.socialButton, styles.appleButton]}>
+          <View style={styles.socialButtonContent}>
+            <Text style={styles.appleButtonText}>Continue with Apple</Text>
+          </View>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -99,31 +126,41 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
     padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 30,
-    textAlign: 'center',
+    paddingTop: 40,
   },
   input: {
     backgroundColor: '#ffffff',
-    padding: 15,
-    borderRadius: 5,
-    marginBottom: 15,
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e1e1e1',
+    borderColor: '#E8E8E8',
+    fontSize: 16,
+  },
+  passwordContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 16,
+    top: 16,
   },
   loginButton: {
     backgroundColor: '#7B68EE',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
+    padding: 16,
     borderRadius: 25,
     alignItems: 'center',
-    marginTop: 15,
+    marginTop: 8,
+    shadowColor: '#7B68EE',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   loginButtonDisabled: {
     opacity: 0.7,
@@ -131,23 +168,65 @@ const styles = StyleSheet.create({
   loginButtonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
-  passwordContainer: {
-    position: 'relative',
-    marginBottom: 15,
+  forgotPassword: {
+    color: '#7B68EE',
+    textAlign: 'center',
+    marginTop: 16,
+    fontSize: 14,
   },
-  passwordInput: {
+  signUpLink: {
+    textAlign: 'center',
+    marginTop: 16,
+    fontSize: 14,
+    color: '#000000',
+  },
+  signUpText: {
+    color: '#7B68EE',
+    fontWeight: '600',
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E8E8E8',
+  },
+  orText: {
+    color: '#A0A0A0',
+    paddingHorizontal: 16,
+    fontSize: 14,
+  },
+  socialButton: {
     backgroundColor: '#ffffff',
-    padding: 15,
-    borderRadius: 5,
+    padding: 16,
+    borderRadius: 25,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e1e1e1',
+    borderColor: '#E8E8E8',
   },
-  eyeIcon: {
-    position: 'absolute',
-    right: 12,
-    top: 12,
+  socialButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  socialButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  appleButton: {
+    backgroundColor: '#000000',
+    borderColor: '#000000',
+  },
+  appleButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 
