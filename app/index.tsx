@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image, ViewStyle, TextStyle, ImageStyle } from 'react-native';
-import { useRouter, Link } from 'expo-router';
+import { useRouter, Link, Stack } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 const App = () => {
@@ -19,6 +19,15 @@ const App = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Stack.Screen
+        options={{
+          title: "Home",
+          headerTitleAlign: 'center',
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: '#ffffff' },
+          headerTintColor: '#333',
+        }}
+      />
       {/* Main Content */}
       <View style={styles.hero}>
         <Image 
