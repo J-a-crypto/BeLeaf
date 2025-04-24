@@ -157,9 +157,10 @@ const styles = StyleSheet.create<Styles>({
     textAlign: 'left',
   },
   buttonLogo: {
-    width: 42,
-    height: 300,
+    width: 50,
+    height: 160,
     resizeMode: 'contain',
+
   },
   mainLogo: {
     width: 130,
