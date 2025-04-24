@@ -116,7 +116,7 @@ const SignUpScreen = () => {
       />
       <View style={styles.content}>
         <Image
-          source={require('./assets/logo.png')}
+          source={require('./assets/mainPage.png')}
           style={styles.mascot}
         />
         

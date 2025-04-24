@@ -22,7 +22,7 @@ const App = () => {
       {/* Main Content */}
       <View style={styles.hero}>
         <Image 
-          source={require('./assets/logo.png')}
+          source={require('./assets/mainPage.png')}
           style={styles.mainLogo}
         />
         <Text style={styles.title}>Empowering Every Step</Text>
@@ -33,7 +33,7 @@ const App = () => {
           >
             <View style={styles.buttonContent}>
               <Image 
-                source={require('./assets/ParentCAT.png')}
+                source={require('./assets/parent.png')}
                 style={styles.buttonLogo}
               />
               <Text style={styles.buttonText}>I'm a Parent</Text>
@@ -45,7 +45,7 @@ const App = () => {
           >
             <View style={styles.buttonContent}>
               <Image 
-                source={require('./assets/TeacherCAT.png')}
+                source={require('./assets/teacher.png')}
                 style={styles.buttonLogo}
               />
               <Text style={styles.buttonText}>I'm a Teacher</Text>
@@ -57,7 +57,7 @@ const App = () => {
           >
             <View style={styles.buttonContent}>
               <Image 
-                source={require('./assets/StudentCAT.png')}
+                source={require('./assets/student.png')}
                 style={styles.buttonLogo}
               />
               <Text style={styles.buttonText}>I'm a Student</Text>
@@ -148,8 +148,8 @@ const styles = StyleSheet.create<Styles>({
     textAlign: 'left',
   },
   buttonLogo: {
-    width: 32,
-    height: 32,
+    width: 42,
+    height: 300,
     resizeMode: 'contain',
   },
   mainLogo: {
