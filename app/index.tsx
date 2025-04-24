@@ -163,8 +163,8 @@ const styles = StyleSheet.create<Styles>({
 
   },
   mainLogo: {
-    width: 130,
-    height: 130,
+    width: 200,
+    height: 200,
     marginBottom: 20,
     resizeMode: 'contain',
   },
