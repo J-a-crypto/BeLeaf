@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
-import { useRouter, Stack } from 'expo-router';
+import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './configuration';
@@ -11,12 +11,23 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { role } = useLocalSearchParams(); // ✅ get role from params
 
   const handleLogin = async () => {
     try {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email.trim(), password);
-      router.replace({ pathname: 'land' } as any);
+  
+      // role might come as an array (bug in expo-router sometimes), fix it
+      const userRole = Array.isArray(role) ? role[0] : role;
+  
+      if (userRole === 'parent') {
+        router.replace('/parent-dashboard');
+      } else if (userRole === 'teacher') {
+        router.replace('/teacher-dashboard');
+      } else {
+        router.replace('/land'); // default student
+      }
     } catch (error: any) {
       let errorMessage = 'An error occurred during login.';
       if (error.code === 'auth/invalid-credential') {
@@ -29,6 +40,7 @@ const LoginScreen = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -120,15 +132,8 @@ const LoginScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f4f4f9',
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-    paddingTop: 40,
-  },
+  container: { flex: 1, backgroundColor: '#f4f4f9' },
+  content: { flex: 1, padding: 20, paddingTop: 40 },
   input: {
     backgroundColor: '#ffffff',
     padding: 16,
@@ -138,15 +143,8 @@ const styles = StyleSheet.create({
     borderColor: '#E8E8E8',
     fontSize: 16,
   },
-  passwordContainer: {
-    position: 'relative',
-    marginBottom: 16,
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 16,
-    top: 16,
-  },
+  passwordContainer: { position: 'relative', marginBottom: 16 },
+  eyeIcon: { position: 'absolute', right: 16, top: 16 },
   loginButton: {
     backgroundColor: '#7B68EE',
     padding: 16,
@@ -154,22 +152,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
     shadowColor: '#7B68EE',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
   },
-  loginButtonDisabled: {
-    opacity: 0.7,
-  },
-  loginButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  loginButtonDisabled: { opacity: 0.7 },
+  loginButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
   forgotPassword: {
     color: '#7B68EE',
     textAlign: 'center',
@@ -182,25 +171,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#000000',
   },
-  signUpText: {
-    color: '#7B68EE',
-    fontWeight: '600',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E8E8E8',
-  },
-  orText: {
-    color: '#A0A0A0',
-    paddingHorizontal: 16,
-    fontSize: 14,
-  },
+  signUpText: { color: '#7B68EE', fontWeight: '600' },
+  dividerContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 24 },
+  divider: { flex: 1, height: 1, backgroundColor: '#E8E8E8' },
+  orText: { color: '#A0A0A0', paddingHorizontal: 16, fontSize: 14 },
   socialButton: {
     backgroundColor: '#ffffff',
     padding: 16,
@@ -209,25 +183,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E8E8E8',
   },
-  socialButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  socialButtonText: {
-    color: '#000000',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  appleButton: {
-    backgroundColor: '#000000',
-    borderColor: '#000000',
-  },
-  appleButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '500',
-  },
+  socialButtonContent: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  socialButtonText: { color: '#000000', fontSize: 16, fontWeight: '500' },
+  appleButton: { backgroundColor: '#000000', borderColor: '#000000' },
+  appleButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '500' },
 });
 
 export default LoginScreen;
