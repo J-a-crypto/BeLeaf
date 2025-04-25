@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Facial Emotion Recognition",
+    "slug": "facial-emotion-recognition",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to detect facial emotions."
+      }
+    },
+    "android": {
+      "permissions": ["CAMERA"]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to detect facial emotions."
+        }
+      ]
+    ],
+    "newArchEnabled": true
+  }
+}
