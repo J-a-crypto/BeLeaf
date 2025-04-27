@@ -49,7 +49,16 @@ const LoginScreen = () => {
           title: "Log in",
           headerTitleAlign: 'center',
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: '#f4f4f9' }
+          headerStyle: { backgroundColor: '#f4f4f9' },
+          headerLeft: () => (
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              style={styles.backButton}
+            >
+              <Ionicons name="arrow-back" size={24} color="#7B68EE" />
+            </TouchableOpacity>
+          ),
+          headerShown: true,
         }}
       />
       <View style={styles.content}>
@@ -95,7 +104,7 @@ const LoginScreen = () => {
           {loading ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
-            <Text style={styles.loginButtonText}>Continue</Text>
+          <Text style={styles.loginButtonText}>Continue</Text>
           )}
         </TouchableOpacity>
 
@@ -187,6 +196,10 @@ const styles = StyleSheet.create({
   socialButtonText: { color: '#000000', fontSize: 16, fontWeight: '500' },
   appleButton: { backgroundColor: '#000000', borderColor: '#000000' },
   appleButtonText: { color: '#ffffff', fontSize: 16, fontWeight: '500' },
+  backButton: {
+    marginLeft: 16,
+    padding: 8,
+  },
 });
 
 export default LoginScreen;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image, ViewStyle, TextStyle, ImageStyle, Platform } from 'react-native';
 import { useRouter, Link, Stack } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
 
@@ -120,35 +120,18 @@ const styles = StyleSheet.create<Styles>({
     borderRadius: 45,
     width: '100%',
     justifyContent: 'center',
-    shadowColor: '#4020b8',
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
+    ...(Platform.OS === 'android' ? { elevation: 8 } : {}),
+    ...(Platform.OS === 'ios' ? {
+      shadowColor: '#6020b8',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+    } : {}),
   },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 15,
-  },
-  '@media android': {
-    button: {
-      elevation: 8,
-    },
-  },
-  '@media ios': {
-    button: {
-      shadowColor: '#6020b8',
-      shadowOffset: {
-        width: 0,
-        height: 0,
-      },
-      shadowOpacity: 0.3,
-      shadowRadius: 12,
-    },
   },
   buttonText: {
     color: '#333333',
@@ -160,7 +143,6 @@ const styles = StyleSheet.create<Styles>({
     width: 50,
     height: 160,
     resizeMode: 'contain',
-
   },
   mainLogo: {
     width: 200,

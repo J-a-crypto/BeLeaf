@@ -3,8 +3,10 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Imag
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { ref, set } from 'firebase/database';
-import { auth, database } from './configuration';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { auth } from './configuration';
+
+const firestore = getFirestore();
 
 const titles = ['Mr.', 'Mrs.', 'Ms.', 'Dr.'];
 const roles = ['Teacher', 'Parent', 'Student'];
@@ -33,16 +35,19 @@ const SignUpScreen = () => {
       setLoading(true);
       const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
       
-      // Add user details to Firebase Realtime Database
-      const userRef = ref(database, 'users/' + userCredential.user.uid);
-      await set(userRef, {
-        title,
-        firstName,
-        lastName,
-        email: email.trim(),
-        role,
-        createdAt: new Date().toISOString()
-      });
+      // Use a Firestore-safe document ID
+      const safeEmail = email.trim().replace(/[.@]/g, '_');
+      await setDoc(
+        doc(firestore, 'users', safeEmail),
+        {
+          title,
+          firstName,
+          lastName,
+          email: email.trim(),
+          role,
+          createdAt: new Date().toISOString(),
+        }
+      );
 
       router.replace({ pathname: 'land' } as any);
     } catch (error: any) {
@@ -104,20 +109,26 @@ const SignUpScreen = () => {
     <SafeAreaView style={styles.container}>
       <Stack.Screen 
         options={{
+          title: "Sign up",
+          headerTitleAlign: 'center',
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: '#fff' },
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={24} color="#000" />
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              style={styles.backButton}
+            >
+              <Ionicons name="arrow-back" size={24} color="#7B68EE" />
             </TouchableOpacity>
           ),
-          headerTitle: '',
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: '#fff' }
+          headerShown: true,
         }}
       />
       <View style={styles.content}>
         <Image
           source={require('./assets/teacher.png')}
           style={styles.mascot}
+          resizeMode="contain"
         />
         
         <Text style={styles.title}>Create Account</Text>
@@ -208,12 +219,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
-    alignItems: 'center',
   },
   mascot: {
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
     marginBottom: 16,
+    alignSelf: 'center',
   },
   title: {
     fontSize: 24,
@@ -312,6 +323,10 @@ const styles = StyleSheet.create({
   selectedItemText: {
     color: '#7B68EE',
     fontWeight: '600',
+  },
+  backButton: {
+    marginLeft: 16,
+    padding: 8,
   },
 });
 
