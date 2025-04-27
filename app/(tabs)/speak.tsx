@@ -23,7 +23,10 @@ const SpeakScreen: React.FC = () => {
         }}
       />
       <View style={styles.container}>
-        <TouchableOpacity style={styles.cardButton}>
+        <TouchableOpacity 
+          style={styles.cardButton}
+          onPress={() => router.push('../../speech-text-speech')}
+        >
           <Image source={require('../assets/speech.png')} style={styles.cardImage} resizeMode="contain" />
           <Text style={styles.cardLabel}>Speech-text-speech</Text>
         </TouchableOpacity>

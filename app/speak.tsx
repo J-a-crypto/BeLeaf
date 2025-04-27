@@ -1,11 +1,28 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image } from 'react-native';
+import { useRouter } from 'expo-router';
 
 const SpeakScreen: React.FC = () => {
+  const router = useRouter();
+  
+  const handleNavigation = () => {
+    console.log('Attempting to navigate to speech-text-speech');
+    try {
+      console.log('Navigation starting...');
+      router.push('/(root)/speech-text-speech');
+      console.log('Navigation command executed');
+    } catch (error: unknown) {
+      console.error('Navigation error:', error instanceof Error ? error.message : 'Unknown error');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.cardButton}>
+        <TouchableOpacity 
+          style={styles.cardButton}
+          onPress={handleNavigation}
+        >
           <Image source={require('./assets/speech.png')} style={styles.cardImage} />
           <Text style={styles.cardLabel}>Speech-text-speech</Text>
         </TouchableOpacity>
