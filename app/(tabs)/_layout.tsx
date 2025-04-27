@@ -18,6 +18,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="meoai"
+        options={{
+          title: 'Meo AI',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbubble-ellipses-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
