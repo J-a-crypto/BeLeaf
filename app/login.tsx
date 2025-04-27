@@ -17,17 +17,7 @@ const LoginScreen = () => {
     try {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email.trim(), password);
-  
-      // role might come as an array (bug in expo-router sometimes), fix it
-      const userRole = Array.isArray(role) ? role[0] : role;
-  
-      if (userRole === 'parent') {
-        router.replace('/parent-dashboard');
-      } else if (userRole === 'teacher') {
-        router.replace('/teacher-dashboard');
-      } else {
-        router.replace('/land'); // default student
-      }
+      router.replace('/home');
     } catch (error: any) {
       let errorMessage = 'An error occurred during login.';
       if (error.code === 'auth/invalid-credential') {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 
-const LandingPage: React.FC = () => {
+const SettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.title}>dashboard</Text>
+        <Text style={styles.title}>Settings</Text>
       </View>
     </SafeAreaView>
   );
@@ -29,4 +29,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LandingPage; 
+export default SettingsScreen; 

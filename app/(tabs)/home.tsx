@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 
-const LandingPage: React.FC = () => {
+const HomeScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -29,4 +29,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LandingPage; 
+export default HomeScreen; 
