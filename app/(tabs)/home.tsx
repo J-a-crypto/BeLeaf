@@ -57,7 +57,7 @@ const HomeScreen: React.FC = () => {
             <Image source={require('../assets/chat.png')} style={styles.cardImage} />
             <Text style={styles.cardLabel} numberOfLines={1}>Chat</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cardButton}>
+          <TouchableOpacity style={styles.cardButton} onPress={() => router.push('../pomodoro')}>
             <Image source={require('../assets/pomodoro.png')} style={styles.cardImage} />
             <Text style={styles.cardLabel} numberOfLines={1}>Pomodoro</Text>
           </TouchableOpacity>

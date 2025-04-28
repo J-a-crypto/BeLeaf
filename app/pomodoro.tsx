@@ -1,18 +1,19 @@
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Text, SafeAreaView } from "react-native";
 import { TimerCountDownDisplay } from "../components/TimerCountDownDisplay";
 import { TimerModeDisplay, TimerModes } from "../components/TimerModeDisplay";
 import { TimerToggleButton } from "../components/TimerToggleButton";
 import React from "react";
 import { useRouter, Stack } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 const FOCUS_TIME_MINUTES = 25 * 60 * 1000;
 const BREAK_TIME_MINUTES = 5.0 * 60 * 1000;
 
 export default function PomodoroPage() {
   const [timerCount, setTimerCount] = useState<number>(FOCUS_TIME_MINUTES);
-  const [intervalId, setIntervalId] = useState<NodeJS.Timer | null>(null);
+  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [timerMode, setTimerMode] = useState<TimerModes>("Focus");
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const router = useRouter();
@@ -44,58 +45,94 @@ export default function PomodoroPage() {
     setIntervalId(null);
   };
 
+  const skipToBreak = () => {
+    stopCountDown();
+    setTimerMode("Break");
+    setTimerCount(BREAK_TIME_MINUTES);
+  };
+
+  const backToStudy = () => {
+    stopCountDown();
+    setTimerMode("Focus");
+    setTimerCount(FOCUS_TIME_MINUTES);
+  };
+
   return (
-    <View
+    <SafeAreaView 
       style={{
-        ...styles.container,
-        ...{ backgroundColor: timerMode === "Break" ? "#2a9d8f" : "#d95550" },
+        flex: 1,
+        backgroundColor: timerMode === "Break" ? "#2a9d8f" : "#d95550",
       }}
     >
-      <Stack.Screen 
-        options={{
-          title: "Pomodoro Timer",
-          headerTitleAlign: 'center',
-          headerShadowVisible: false,
-          headerStyle: { 
-            backgroundColor: timerMode === "Break" ? "#2a9d8f" : "#d95550" 
-          },
-          headerTintColor: '#fff',
-          headerLeft: () => (
-            <TouchableOpacity 
-              onPress={() => router.back()}
-              style={styles.backButton}
-            >
-              <Text style={styles.backButtonText}>Back</Text>
-            </TouchableOpacity>
-          ),
-        }}
-      />
       <StatusBar style="light" />
-      <TimerModeDisplay timerMode={timerMode} />
+      
+      {/* Custom Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          onPress={() => router.back()} 
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
 
-      <TimerToggleButton
-        startCountDownHandler={startCountDown}
-        isTimerRunning={isTimerRunning}
-        setIsTimerRunning={setIsTimerRunning}
-        stopCountDownHandler={stopCountDown}
-      />
-      <TimerCountDownDisplay countDownDate={new Date(timerCount)} />
-    </View>
+        {timerMode === "Focus" ? (
+          <TouchableOpacity 
+            onPress={skipToBreak} 
+            style={styles.modeButton}
+          >
+            <Text style={styles.modeButtonText}>Skip to Break</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity 
+            onPress={backToStudy} 
+            style={styles.modeButton}
+          >
+            <Text style={styles.modeButtonText}>Back to Study</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View style={styles.container}>
+        <TimerModeDisplay timerMode={timerMode} />
+        <TimerToggleButton
+          startCountDownHandler={startCountDown}
+          isTimerRunning={isTimerRunning}
+          setIsTimerRunning={setIsTimerRunning}
+          stopCountDownHandler={stopCountDown}
+        />
+        <TimerCountDownDisplay countDownDate={new Date(timerCount)} />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  header: {
+    height: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    width: '100%',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    padding: 10,
+  },
+  modeButton: {
+    padding: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  modeButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   container: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-  },
-  backButton: {
-    marginLeft: 10,
-  },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    paddingHorizontal: 20,
   }
 }); 
