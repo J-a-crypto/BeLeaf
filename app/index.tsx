@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image, ViewStyle, TextStyle, ImageStyle, Platform } from 'react-native';
 import { useRouter, Link, Stack } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
+import DatabaseTest from './components/DatabaseTest';
 
 const App = () => {
   const router = useRouter();
@@ -30,42 +31,48 @@ const App = () => {
       />
       {/* Main Content */}
       <View style={styles.hero}>
-        <Image 
+        <Image
           source={require('./assets/mainPage.png')}
           style={styles.mainLogo}
         />
         <Text style={styles.title}>Empowering Every Step</Text>
+
+        {/* Database Test Component */}
+        <View style={styles.dbTestContainer}>
+          <DatabaseTest />
+        </View>
+
         <View style={styles.buttonContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.button}
             onPress={() => handleNavigation('parent')}
           >
             <View style={styles.buttonContent}>
-              <Image 
+              <Image
                 source={require('./assets/parent.png')}
                 style={styles.buttonLogo}
               />
               <Text style={styles.buttonText}>I'm a Parent</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.button}
             onPress={() => handleNavigation('teacher')}
           >
             <View style={styles.buttonContent}>
-              <Image 
+              <Image
                 source={require('./assets/teacher.png')}
                 style={styles.buttonLogo}
               />
               <Text style={styles.buttonText}>I'm a Teacher</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.button}
             onPress={() => handleNavigation('student')}
           >
             <View style={styles.buttonContent}>
-              <Image 
+              <Image
                 source={require('./assets/student.png')}
                 style={styles.buttonLogo}
               />
@@ -88,6 +95,7 @@ interface Styles {
   buttonText: TextStyle;
   buttonLogo: ImageStyle;
   mainLogo: ImageStyle;
+  dbTestContainer: ViewStyle;
 }
 
 const styles = StyleSheet.create<Styles>({
@@ -105,13 +113,14 @@ const styles = StyleSheet.create<Styles>({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 40,
+    marginBottom: 20,
     textAlign: 'center',
   },
   buttonContainer: {
     width: '100%',
     alignItems: 'center',
     gap: 20,
+    marginTop: 20,
   },
   button: {
     backgroundColor: '#ffffff',
@@ -149,6 +158,13 @@ const styles = StyleSheet.create<Styles>({
     height: 200,
     marginBottom: 20,
     resizeMode: 'contain',
+  },
+  dbTestContainer: {
+    width: '100%',
+    marginBottom: 20,
+    padding: 10,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
   },
 });
 

@@ -30,18 +30,18 @@ const LoginScreen = () => {
       setLoading(false);
     }
   };
-  
+
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen 
+      <Stack.Screen
         options={{
           title: "Log in",
           headerTitleAlign: 'center',
           headerShadowVisible: false,
           headerStyle: { backgroundColor: '#f4f4f9' },
           headerLeft: () => (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => router.back()}
               style={styles.backButton}
             >
@@ -86,19 +86,19 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity 
-          style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
+        <TouchableOpacity
+          style={[styles.loginButton, loading && styles.loginButtonDisabled]}
           onPress={handleLogin}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
-          <Text style={styles.loginButtonText}>Continue</Text>
+            <Text style={styles.loginButtonText}>Continue</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push({ pathname: 'forgot-password' } as any)}>
+        <TouchableOpacity onPress={() => router.push({ pathname: 'teacher-dashboard' } as any)}>
           <Text style={styles.forgotPassword}>Forgot your password?</Text>
         </TouchableOpacity>
 

@@ -43,7 +43,7 @@ const TeacherDashboard: React.FC = () => {
 
           <TouchableOpacity
             style={styles.card}
-            onPress={() => router.push('/messages' as any)}
+            onPress={() => router.push('/speech-text-speech' as any)}
           >
             <Text style={styles.cardIcon}>💬</Text>
             <Text style={styles.cardTitle}>Messages</Text>
