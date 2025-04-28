@@ -156,48 +156,66 @@ export default function ReadingPage() {
         await signInAnonymously(auth);
       }
 
+      // Request permissions with more detailed error handling
       const { status } = await Audio.requestPermissionsAsync();
       if (status !== 'granted') {
         alert('Permission to access microphone is required!');
         return;
       }
 
+      // Set audio mode with more specific configuration
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
       });
 
-      // Configure recording for WAV format with LINEAR16 encoding
-      const { recording } = await Audio.Recording.createAsync({
-        android: {
-          extension: '.wav',
-          outputFormat: Audio.AndroidOutputFormat.DEFAULT,
-          audioEncoder: Audio.AndroidAudioEncoder.DEFAULT,
-          sampleRate: 44100,
-          numberOfChannels: 1,
-          bitRate: 128000,
-        },
-        ios: {
-          extension: '.wav',
-          outputFormat: Audio.IOSOutputFormat.LINEARPCM,
-          audioQuality: Audio.IOSAudioQuality.MAX,
-          sampleRate: 44100,
-          numberOfChannels: 1,
-          bitRate: 128000,
-          linearPCMBitDepth: 16,
-          linearPCMIsBigEndian: false,
-          linearPCMIsFloat: false,
-        },
-        web: {
-          mimeType: 'audio/wav',
-          bitsPerSecond: 128000,
-        },
-      });
+      console.log('Audio mode set successfully');
 
-      setRecording(recording);
-      setIsRecording(true);
-      setFeedback('Recording... Speak the text on screen');
-      console.log('Recording started successfully');
+      // Create a new recording with simplified configuration
+      const newRecording = new Audio.Recording();
+
+      try {
+        // Prepare the recording
+        await newRecording.prepareToRecordAsync({
+          android: {
+            extension: '.wav',
+            outputFormat: Audio.AndroidOutputFormat.DEFAULT,
+            audioEncoder: Audio.AndroidAudioEncoder.DEFAULT,
+            sampleRate: 44100,
+            numberOfChannels: 1,
+            bitRate: 128000,
+          },
+          ios: {
+            extension: '.wav',
+            outputFormat: Audio.IOSOutputFormat.LINEARPCM,
+            audioQuality: Audio.IOSAudioQuality.MAX,
+            sampleRate: 44100,
+            numberOfChannels: 1,
+            bitRate: 128000,
+            linearPCMBitDepth: 16,
+            linearPCMIsBigEndian: false,
+            linearPCMIsFloat: false,
+          },
+          web: {
+            mimeType: 'audio/wav',
+            bitsPerSecond: 128000,
+          },
+        });
+
+        console.log('Recording prepared successfully');
+
+        // Start the recording
+        await newRecording.startAsync();
+        console.log('Recording started successfully');
+
+        setRecording(newRecording);
+        setIsRecording(true);
+        setFeedback('Recording... Speak the text on screen');
+      } catch (err) {
+        console.error('Error during recording preparation or start:', err);
+        alert('Failed to start recording. Please try again.');
+      }
     } catch (err) {
       console.error('Failed to start recording:', err);
       alert('Failed to start recording. Please check your connection and try again.');
@@ -209,6 +227,7 @@ export default function ReadingPage() {
     try {
       if (!recording) {
         console.log('No recording found to stop');
+        setFeedback('No recording found to stop. Please try recording again.');
         return;
       }
 
@@ -220,29 +239,44 @@ export default function ReadingPage() {
       console.log('Stopping recording...');
       setIsRecording(false);
       setFeedback('Processing your speech...');
-      await recording.stopAndUnloadAsync();
+
+      try {
+        await recording.stopAndUnloadAsync();
+        console.log('Recording stopped successfully');
+      } catch (stopError) {
+        console.error('Error stopping recording:', stopError);
+        setFeedback('Error stopping recording. Please try again.');
+        return;
+      }
+
       const uri = recording.getURI();
       setRecording(undefined);
 
       if (uri) {
         console.log('Recording URI:', uri);
         console.log('Processing audio file...');
-        const audioData = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
 
-        console.log('Audio data length:', audioData.length);
-        console.log('Sending audio to Firebase Function...');
+        try {
+          const audioData = await FileSystem.readAsStringAsync(uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
 
-        const result = await convertSpeechToText({ audioContent: audioData });
-        console.log('Received response from Firebase Function:', result);
+          console.log('Audio data length:', audioData.length);
+          console.log('Sending audio to Firebase Function...');
 
-        const { transcription } = result.data as { transcription: string };
-        setUserTranscription(transcription);
-        console.log('Transcription completed:', transcription);
+          const result = await convertSpeechToText({ audioContent: audioData });
+          console.log('Received response from Firebase Function:', result);
 
-        // Evaluate the transcription against the expected text
-        evaluatePronunciation(transcription);
+          const { transcription } = result.data as { transcription: string };
+          setUserTranscription(transcription);
+          console.log('Transcription completed:', transcription);
+
+          // Evaluate the transcription against the expected text
+          evaluatePronunciation(transcription);
+        } catch (processError) {
+          console.error('Error processing audio:', processError);
+          setFeedback('Error processing your speech. Please try again.');
+        }
       } else {
         console.log('No URI found for the recording');
         setFeedback('Failed to process recording. Please try again.');
