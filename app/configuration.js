@@ -1,4 +1,4 @@
-// Import the necessary Firebase modules
+
 import { initializeApp } from "firebase/app";
 
 // Your Firebase config here
