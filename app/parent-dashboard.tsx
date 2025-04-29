@@ -49,6 +49,15 @@ const ParentDashboard: React.FC = () => {
             <Text style={styles.cardTitle}>Messages</Text>
             <Text style={styles.cardDescription}>Chat with teachers and staff</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => router.push('/meo' as any)}
+          >
+            <Text style={styles.cardIcon}>🐱</Text>
+            <Text style={styles.cardTitle}>MeowAI</Text>
+            <Text style={styles.cardDescription}>Chat with our friendly AI assistant</Text>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity

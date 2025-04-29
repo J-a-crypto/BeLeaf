@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, ScrollView, FlatList, SafeAreaView, Alert, Image } from 'react-native';
+import { View, Text, TextInput, Button, ScrollView, FlatList, SafeAreaView, Alert, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+import { signInAnonymously } from 'firebase/auth';
+import { auth } from './configuration';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 
 // Get a proper Gemini API key from https://makersuite.google.com/app/apikey
-const API_KEY = 'AIzaSyAIyiX5B9LBmnr3ZrCWkhTF3v_zAl9swxw'; // Replace this with your actual Gemini API key
+const API_KEY = 'AIzaSyAIyiX5B9LBmnr3ZrCWkhTF3v_zAl9swxw';
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 // // Add validation
@@ -12,6 +19,27 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 //   Alert.alert('Error', 'Please set a valid Gemini API key');
 // }
 
+const convertSpeechToText = async ({ audioContent }: { audioContent: string }) => {
+  try {
+    const response = await fetch('https://us-central1-beleaf-4a5c8.cloudfunctions.net/convertSpeechToText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ audioContent }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to convert speech to text');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error converting speech to text:', error);
+    throw error;
+  }
+};
+
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -19,9 +47,65 @@ interface ChatMessage {
 }
 
 export default function Index() {
+  const router = useRouter();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [recording, setRecording] = useState<Audio.Recording | undefined>();
+  const [isRecording, setIsRecording] = useState(false);
+
+  const startRecording = async () => {
+    try {
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(recording);
+      setIsRecording(true);
+      console.log('Recording started successfully');
+    } catch (err) {
+      console.error('Failed to start recording:', err);
+      Alert.alert('Error', 'Failed to start recording. Please check your connection and try again.');
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      if (!recording) {
+        console.log('No recording found to stop');
+        return;
+      }
+
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+
+      console.log('Stopping recording...');
+      setIsRecording(false);
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      setRecording(undefined);
+
+      if (uri) {
+        console.log('Processing audio file...');
+        const audioData = await FileSystem.readAsStringAsync(uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        const result = await convertSpeechToText({ audioContent: audioData });
+        const { transcription } = result.data as { transcription: string };
+        setInput(transcription);
+      }
+    } catch (err) {
+      console.error('Failed to stop recording:', err);
+      Alert.alert('Error', 'Failed to convert speech to text. Please try again.');
+    }
+  };
 
   const fetchGeminiResponse = async () => {
     if (!input.trim()) return;
@@ -84,25 +168,22 @@ export default function Index() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f0ff' }}>
-      <View style={{ 
-        alignItems: 'center', 
-        padding: 20,
-        backgroundColor: '#7c4dff',
-        borderBottomLeftRadius: 20,
-        borderBottomRightRadius: 20,
-      }}>
-        <Text style={{ 
-          fontSize: 32, 
-          fontWeight: 'bold', 
-          color: 'white',
-          marginTop: 10,
-          textShadowColor: 'rgba(0, 0, 0, 0.2)',
-          textShadowOffset: { width: 1, height: 1 },
-          textShadowRadius: 2,
-        }}>
-          🐱 MeowAI
-        </Text>
-      </View>
+      <Stack.Screen
+        options={{
+          title: "MeowAI",
+          headerTitleAlign: 'center',
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: '#fff' },
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.backButton}
+            >
+              <Ionicons name="arrow-back" size={24} color="#7B68EE" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
       <FlatList
         data={chatHistory}
@@ -118,24 +199,26 @@ export default function Index() {
         borderTopWidth: 1,
         borderTopColor: '#e0e0e0',
       }}>
-        <TextInput
-          style={{
-            borderWidth: 2,
-            borderColor: '#b388ff',
-            borderRadius: 20,
-            padding: 12,
-            marginBottom: 10,
-            backgroundColor: '#fff',
-            fontSize: 16,
-            maxHeight: 100,
-            fontFamily: 'System',
-          }}
-          placeholder="Ask me anything... 😊"
-          placeholderTextColor="#9e9e9e"
-          value={input}
-          onChangeText={setInput}
-          multiline
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Ask me anything... 😊"
+            placeholderTextColor="#9e9e9e"
+            value={input}
+            onChangeText={setInput}
+            multiline
+          />
+          <TouchableOpacity
+            style={[styles.recordButton, isRecording && styles.recordingButton]}
+            onPress={isRecording ? stopRecording : startRecording}
+          >
+            <Ionicons
+              name={isRecording ? "stop" : "mic"}
+              size={24}
+              color="#fff"
+            />
+          </TouchableOpacity>
+        </View>
         <Button 
           title={isLoading ? "🤔 Thinking..." : "✨ Send"} 
           onPress={fetchGeminiResponse}
@@ -146,3 +229,38 @@ export default function Index() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  backButton: {
+    padding: 10,
+    marginLeft: 10,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: '#b388ff',
+    borderRadius: 20,
+    padding: 12,
+    backgroundColor: '#fff',
+    fontSize: 16,
+    maxHeight: 100,
+    fontFamily: 'System',
+    marginRight: 10,
+  },
+  recordButton: {
+    backgroundColor: '#7c4dff',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recordingButton: {
+    backgroundColor: '#e74c3c',
+  },
+});
