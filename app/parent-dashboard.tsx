@@ -25,7 +25,7 @@ const ParentDashboard: React.FC = () => {
         <View style={styles.cardContainer}>
           <TouchableOpacity
             style={styles.card}
-            onPress={() => router.push('/resources' as any)}
+            onPress={() => router.push('/meo' as any)}
           >
             <Text style={styles.cardIcon}>📁</Text>
             <Text style={styles.cardTitle}>Resources</Text>

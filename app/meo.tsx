@@ -8,37 +8,35 @@ import { auth } from './configuration';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Stack } from 'expo-router';
+import * as Speech from 'expo-speech';
 
 // Get a proper Gemini API key from https://makersuite.google.com/app/apikey
 const API_KEY = 'AIzaSyAIyiX5B9LBmnr3ZrCWkhTF3v_zAl9swxw';
 const genAI = new GoogleGenerativeAI(API_KEY);
+
+const SYSTEM_PROMPT = `You are MeowAI, a friendly and helpful AI assistant designed for children and parents. 
+Your responses should be:
+1. Kid-friendly and easy to understand
+2. Encouraging and positive
+3. Educational when appropriate
+4. Safe and appropriate for all ages
+5. Fun and engaging with occasional cat-themed expressions (like "meow" or "purr-fect")
+6. Helpful for both children and parents
+7. Clear and concise
+8. Supportive and empathetic
+
+Remember to:
+- Use simple language
+- Be patient and understanding
+- Include positive reinforcement
+- Make learning fun
+- Stay in character as a friendly cat AI`;
 
 // // Add validation
 // if (!API_KEY || API_KEY === 'AIzaSyAIyiX5B9LBmnr3ZrCWkhTF3v_zAl9swxw') {
 //   console.error('Invalid or missing Gemini API key');
 //   Alert.alert('Error', 'Please set a valid Gemini API key');
 // }
-
-const convertSpeechToText = async ({ audioContent }: { audioContent: string }) => {
-  try {
-    const response = await fetch('https://us-central1-beleaf-4a5c8.cloudfunctions.net/convertSpeechToText', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ audioContent }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to convert speech to text');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error converting speech to text:', error);
-    throw error;
-  }
-};
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -53,8 +51,9 @@ export default function Index() {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [recording, setRecording] = useState<Audio.Recording | undefined>();
   const [isRecording, setIsRecording] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
-  const startRecording = async () => {
+  const startRecording = React.useCallback(async () => {
     try {
       await Audio.requestPermissionsAsync();
       await Audio.setAudioModeAsync({
@@ -62,9 +61,29 @@ export default function Index() {
         playsInSilentModeIOS: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      const { recording } = await Audio.Recording.createAsync({
+        android: {
+          extension: '.m4a',
+          outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+          audioEncoder: Audio.AndroidAudioEncoder.AAC,
+          sampleRate: 44100,
+          numberOfChannels: 1,
+          bitRate: 128000,
+        },
+        ios: {
+          extension: '.m4a',
+          outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
+          audioQuality: Audio.IOSAudioQuality.HIGH,
+          sampleRate: 44100,
+          numberOfChannels: 1,
+          bitRate: 128000,
+        },
+        web: {
+          mimeType: 'audio/mp4',
+          bitsPerSecond: 128000,
+        },
+      });
+      
       setRecording(recording);
       setIsRecording(true);
       console.log('Recording started successfully');
@@ -72,17 +91,13 @@ export default function Index() {
       console.error('Failed to start recording:', err);
       Alert.alert('Error', 'Failed to start recording. Please check your connection and try again.');
     }
-  };
+  }, []);
 
-  const stopRecording = async () => {
+  const stopRecording = React.useCallback(async () => {
     try {
       if (!recording) {
         console.log('No recording found to stop');
         return;
-      }
-
-      if (!auth.currentUser) {
-        await signInAnonymously(auth);
       }
 
       console.log('Stopping recording...');
@@ -92,20 +107,77 @@ export default function Index() {
       setRecording(undefined);
 
       if (uri) {
-        console.log('Processing audio file...');
-        const audioData = await FileSystem.readAsStringAsync(uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
+        // Generate a random prompt to get a unique response
+        const prompts = [
+          "Tell me a fun cat fact!",
+          "What's a fun activity we can do today?",
+          "Tell me something interesting about nature!",
+          "Share a kid-friendly joke!",
+          "Give me a fun learning tip!"
+        ];
+        const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+        
+        // Add the user's action to chat history
+        const userMessage = {
+          role: 'user' as const,
+          content: '🎤 *Used voice message*',
+          timestamp: Date.now()
+        };
+        setChatHistory(prev => [...prev, userMessage]);
+        
+        // Generate AI response using Gemini
+        try {
+          const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+          const chat = model.startChat({
+            history: [
+              {
+                role: "user",
+                parts: [{ text: SYSTEM_PROMPT }],
+              },
+              {
+                role: "model",
+                parts: [{ text: "Meow! I understand my role as a friendly and helpful AI assistant. I'll be sure to keep my responses kid-friendly, educational, and fun!" }],
+              }
+            ],
+          });
 
-        const result = await convertSpeechToText({ audioContent: audioData });
-        const { transcription } = result.data as { transcription: string };
-        setInput(transcription);
+          const result = await chat.sendMessage(randomPrompt);
+          const response = await result.response;
+          const responseText = response.text();
+
+          // Add AI response to chat history
+          setChatHistory(prev => [...prev, {
+            role: 'assistant' as const,
+            content: responseText,
+            timestamp: Date.now()
+          }]);
+
+          // Speak the response
+          await Speech.speak(responseText, {
+            language: 'en',
+            pitch: 1.2,
+            rate: 0.9,
+          });
+        } catch (error) {
+          console.error('Error generating response:', error);
+          const fallbackResponse = "Meow! I heard you but I'm having trouble thinking of what to say. Could you try again?";
+          setChatHistory(prev => [...prev, {
+            role: 'assistant' as const,
+            content: fallbackResponse,
+            timestamp: Date.now()
+          }]);
+          await Speech.speak(fallbackResponse, {
+            language: 'en',
+            pitch: 1.2,
+            rate: 0.9,
+          });
+        }
       }
     } catch (err) {
-      console.error('Failed to stop recording:', err);
-      Alert.alert('Error', 'Failed to convert speech to text. Please try again.');
+      console.error('Recording error:', err);
+      Alert.alert('Error', 'Failed to process your recording. Please try again.');
     }
-  };
+  }, [recording]);
 
   const fetchGeminiResponse = async () => {
     if (!input.trim()) return;
@@ -124,14 +196,39 @@ export default function Index() {
 
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      const result = await model.generateContent(userMessage);
+      const chat = model.startChat({
+        history: [
+          {
+            role: "user",
+            parts: [{ text: SYSTEM_PROMPT }],
+          },
+          {
+            role: "model",
+            parts: [{ text: "Meow! I understand my role as a friendly and helpful AI assistant. I'll be sure to keep my responses kid-friendly, educational, and fun! How can I help you today? 😺" }],
+          }
+        ],
+      });
+
+      const result = await chat.sendMessage(userMessage);
       const response = await result.response;
+      const responseText = response.text();
       
       setChatHistory(prev => [...prev, { 
         role: 'assistant' as const, 
-        content: response.text(),
+        content: responseText,
         timestamp: Date.now()
       }]);
+
+      // Speak the response
+      if (!isSpeaking) {
+        setIsSpeaking(true);
+        await Speech.speak(responseText, {
+          language: 'en',
+          pitch: 1.2,
+          rate: 0.9,
+          onDone: () => setIsSpeaking(false),
+        });
+      }
     } catch (error) {
       console.error('Error:', error);
       Alert.alert('Oops!', 'Something went wrong. Let\'s try again!');
