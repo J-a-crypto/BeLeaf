@@ -37,8 +37,12 @@ const ParentDashboard: React.FC = () => {
 
           <TouchableOpacity
             style={styles.card}
+<<<<<<< Updated upstream
             onPress={() => router.push('/appointments')}
 
+=======
+            onPress={() => router.push('/appointments-blank')}
+>>>>>>> Stashed changes
           >
             <Text style={styles.cardIcon}>📅</Text>
             <Text style={styles.cardTitle}>Appointments</Text>
