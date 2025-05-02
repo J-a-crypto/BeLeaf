@@ -54,22 +54,26 @@ const HomeScreen: React.FC = () => {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.cardButton}>
-            <Image source={require('../../assets/images/assignments.png')} style={styles.cardImage} />
+            <Image source={require('../../assets/assignments.png')
+} style={styles.cardImage} />
             <Text style={styles.cardLabel} numberOfLines={1}>Assignments</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.cardButton}>
-            <Image source={require('../../assets/images/assignments.png')} style={styles.cardImage} />
+            <Image source={require('../../assets/assignments.png')
+} style={styles.cardImage} />
             <Text style={styles.cardLabel} numberOfLines={1}>Emotion</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.cardButton}>
-            <Image source={require('../../assets/images/assignments.png')} style={styles.cardImage} />
+            <Image source={require('../../assets/assignments.png')
+} style={styles.cardImage} />
             <Text style={styles.cardLabel} numberOfLines={1}>Chat</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.cardButton} onPress={() => router.push('../pomodoro')}>
-            <Image source={require('../../assets/images/assignments.png')} style={styles.cardImage} />
+            <Image source={require('../../assets/assignments.png')
+} style={styles.cardImage} />
             <Text style={styles.cardLabel} numberOfLines={1}>Pomodoro</Text>
           </TouchableOpacity>
         </View>

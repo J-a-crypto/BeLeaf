@@ -10,7 +10,7 @@ const ParentDashboard: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.replace('/' as any);
+      router.replace('/');
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -27,8 +27,7 @@ const ParentDashboard: React.FC = () => {
         <View style={styles.cardContainer}>
           <TouchableOpacity
             style={styles.card}
-            onPress={() => router.push('/appointments')}
-
+            onPress={() => router.push('/resources')}
           >
             <Text style={styles.cardIcon}>📁</Text>
             <Text style={styles.cardTitle}>Resources</Text>
@@ -37,12 +36,7 @@ const ParentDashboard: React.FC = () => {
 
           <TouchableOpacity
             style={styles.card}
-<<<<<<< Updated upstream
             onPress={() => router.push('/appointments')}
-
-=======
-            onPress={() => router.push('/appointments-blank')}
->>>>>>> Stashed changes
           >
             <Text style={styles.cardIcon}>📅</Text>
             <Text style={styles.cardTitle}>Appointments</Text>
@@ -51,8 +45,7 @@ const ParentDashboard: React.FC = () => {
 
           <TouchableOpacity
             style={styles.card}
-            onPress={() => router.push('/appointments')}
-
+            onPress={() => router.push('/messages')}
           >
             <Text style={styles.cardIcon}>💬</Text>
             <Text style={styles.cardTitle}>Messages</Text>
@@ -105,3 +98,4 @@ const styles = StyleSheet.create({
 });
 
 export default ParentDashboard;
+

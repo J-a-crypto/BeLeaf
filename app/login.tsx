@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from './configuration';
 
 const LoginScreen = () => {
   const { role } = useLocalSearchParams<{ role: string }>();
@@ -12,15 +14,31 @@ const LoginScreen = () => {
 
   const title = role ? `${role.charAt(0).toUpperCase() + role.slice(1)} Login` : 'Login';
 
-  // Handle login action
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (email === '' || password === '') {
-      alert('Please enter both email and password.');
+      Alert.alert('Error', 'Please enter both email and password.');
       return;
     }
 
-    // Simulate successful login and navigate to the landing page
-    router.push('/landing'); // Replace with your actual landing page route
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      console.log('Logged in as:', user.email);
+
+      // Redirect based on role
+      if (role === 'parent') {
+        router.replace('/parent-dashboard');
+      } else if (role === 'teacher') {
+        router.replace('/teacher-dashboard');
+      } else {
+        router.replace('/'); // fallback
+      }
+
+    } catch (error: any) {
+      console.error('Login failed:', error.message);
+      Alert.alert('Login Failed', error.message);
+    }
   };
 
   return (
