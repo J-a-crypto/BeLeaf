@@ -51,7 +51,7 @@ const AppointmentsScreen = () => {
       }
 
       try {
-        const snapshot = await getDocs(collection(db, 'appointments', user.uid));
+        const snapshot = await getDocs(collection(db, 'appointments', user.uid, 'items'));
         const loadedAppointments = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -69,7 +69,8 @@ const AppointmentsScreen = () => {
 
   const filteredAppointments = appointments.filter(appointment => {
     const statusFilter = selectedFilter === 'all' ? true : appointment.status === selectedFilter;
-    return statusFilter;
+    const dateFilter = appointment.date === selectedDate;
+    return statusFilter && dateFilter;
   });
 
   const getStatusColor = (status: string) => {

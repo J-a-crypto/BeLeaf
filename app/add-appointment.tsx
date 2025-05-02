@@ -48,8 +48,7 @@ const AddAppointmentScreen = () => {
         userId: currentUser.uid
       };
 
-      await addDoc(collection(db, 'appointments', currentUser.uid), appointment);
-
+      await addDoc(collection(db, 'appointments', currentUser.uid, 'items'), appointment);
 
       Alert.alert('Success', 'Appointment added successfully');
       router.replace('/appointments');
