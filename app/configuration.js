@@ -1,16 +1,29 @@
-
 import { initializeApp } from "firebase/app";
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { getDatabase } from 'firebase/database';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFirestore } from 'firebase/firestore';
 
-// Your Firebase config here
 const firebaseConfig = {
-  apiKey: "AIzaSyBuuVNmWZW4FwAfpgW3LpXtx56-S90F850",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "beleaf-e9b79",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyB8tBsiVATy86oRG-0t6xl78W4FShJB2PM",
+  authDomain: "beleaf-ef6bb.firebaseapp.com",
+  databaseURL: "https://beleaf-ef6bb-default-rtdb.firebaseio.com",
+  projectId: "beleaf-ef6bb",
+  storageBucket: "beleaf-ef6bb.firebasestorage.app",
+  messagingSenderId: "900408739304",
+  appId: "1:900408739304:web:54f79b18ccea4e4607505d",
+  measurementId: "G-EL7L2VH2LM"
 };
 
-// Initialize Firebase
-const cong = initializeApp(firebaseConfig);
-export default cong;
+const app = initializeApp(firebaseConfig);
+
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
+const database = getDatabase(app);
+const db = getFirestore(app);
+
+
+export { auth, database, db, app };
+
+

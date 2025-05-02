@@ -1,4 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
+
+console.log('Appointments screen loaded');
+
+
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useRouter, Stack, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -397,8 +402,13 @@ const AppointmentsScreen = () => {
       </ScrollView>
       
       <TouchableOpacity 
+
         style={styles.addButton}
         onPress={() => router.push({ pathname: '/add-appointment', params: { selectedDate } })}
+
+        style={styles.newAppointmentButton}
+        onPress={() => router.push('/add-appointment')}
+
       >
         <Text style={styles.addButtonText}>Add New Appointment</Text>
       </TouchableOpacity>
