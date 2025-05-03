@@ -1,27 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getCurrentUser } from '../utils/auth';
 
 const HomeScreen: React.FC = () => {
   const [userName, setUserName] = useState('');
   const router = useRouter();
-  const auth = getAuth();
-  const firestore = getFirestore();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const user = auth.currentUser;
+        const user = await getCurrentUser();
         if (user) {
-          const safeEmail = user.email?.replace(/[.@]/g, '_') || '';
-          const userDoc = await getDoc(doc(firestore, 'users', safeEmail));
-          
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserName(`${userData.firstName}`);
-          }
+          // Extract first name from the full name
+          const firstName = user.name.split(' ').slice(-2)[0];
+          setUserName(firstName);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);

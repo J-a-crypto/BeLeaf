@@ -1,25 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
-import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getCurrentUser } from '../utils/auth';
 
 const MeoAIScreen: React.FC = () => {
   const [userName, setUserName] = useState('');
-  const auth = getAuth();
-  const firestore = getFirestore();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const user = auth.currentUser;
+        const user = await getCurrentUser();
         if (user) {
-          const safeEmail = user.email?.replace(/[.@]/g, '_') || '';
-          const userDoc = await getDoc(doc(firestore, 'users', safeEmail));
-          
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserName(`${userData.title} ${userData.firstName} ${userData.lastName}`);
-          }
+          setUserName(user.name);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);

@@ -2,30 +2,31 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './configuration';
+import { signIn } from './utils/auth';
 
 const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
   const { role } = useLocalSearchParams(); // ✅ get role from params
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+    
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      router.replace('/home');
+      setError('');
+      await signIn(email.trim(), password);
+      router.replace({ pathname: '/(tabs)/home' });
     } catch (error: any) {
-      let errorMessage = 'An error occurred during login.';
-      if (error.code === 'auth/invalid-credential') {
-        errorMessage = 'Invalid email or password.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
-      }
-      console.error(errorMessage);
+      setError(error.message || 'An error occurred during login.');
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,10 @@ const LoginScreen = () => {
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={(text) => {
+            setEmail(text);
+            setError('');
+          }}
           editable={!loading}
         />
 
@@ -70,7 +74,10 @@ const LoginScreen = () => {
             placeholderTextColor="#A0A0A0"
             secureTextEntry={!showPassword}
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              setError('');
+            }}
             editable={!loading}
           />
           <TouchableOpacity
@@ -86,6 +93,8 @@ const LoginScreen = () => {
           </TouchableOpacity>
         </View>
 
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
         <TouchableOpacity 
           style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
           onPress={handleLogin}
@@ -94,7 +103,7 @@ const LoginScreen = () => {
           {loading ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
-          <Text style={styles.loginButtonText}>Continue</Text>
+            <Text style={styles.loginButtonText}>Continue</Text>
           )}
         </TouchableOpacity>
 
@@ -189,6 +198,12 @@ const styles = StyleSheet.create({
   backButton: {
     marginLeft: 16,
     padding: 8,
+  },
+  errorText: {
+    color: '#ff3b30',
+    marginBottom: 16,
+    textAlign: 'center',
+    fontSize: 14,
   },
 });
 

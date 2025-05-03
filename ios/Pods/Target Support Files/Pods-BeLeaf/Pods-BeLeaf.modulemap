@@ -1,6 +1,0 @@
-module Pods_BeLeaf {
-  umbrella header "Pods-BeLeaf-umbrella.h"
-
-  export *
-  module * { export * }
-}

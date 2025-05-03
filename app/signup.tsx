@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Image, Modal, ScrollView } from 'react-native';
 import { useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import { auth } from './configuration';
-
-const firestore = getFirestore();
+import { signUp } from './utils/auth';
 
 const titles = ['Mr.', 'Mrs.', 'Ms.', 'Dr.'];
 const roles = ['Teacher', 'Parent', 'Student'];
@@ -19,6 +15,7 @@ const SignUpScreen = () => {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Teacher');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const [showTitleDropdown, setShowTitleDropdown] = useState(false);
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
@@ -27,39 +24,21 @@ const SignUpScreen = () => {
 
   const handleSignUp = async () => {
     if (!firstName.trim() || !lastName.trim()) {
-      console.error('Please enter your full name');
+      setError('Please enter your full name');
       return;
     }
 
     try {
       setLoading(true);
-      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      setError('');
       
-      // Use a Firestore-safe document ID
-      const safeEmail = email.trim().replace(/[.@]/g, '_');
-      await setDoc(
-        doc(firestore, 'users', safeEmail),
-        {
-          title,
-          firstName,
-          lastName,
-          email: email.trim(),
-          role,
-          createdAt: new Date().toISOString(),
-        }
-      );
-
-      router.replace({ pathname: 'land' } as any);
+      const name = `${title} ${firstName.trim()} ${lastName.trim()}`;
+      await signUp(email.trim(), password, role.toLowerCase() as 'teacher' | 'parent' | 'student', name);
+      
+      router.replace({ pathname: '/(tabs)/home' });
     } catch (error: any) {
-      let errorMessage = 'An error occurred during sign up.';
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'This email is already registered.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'Password should be at least 6 characters.';
-      }
-      console.error(errorMessage);
+      setError(error.message || 'An error occurred during sign up.');
+      console.error('Signup error:', error);
     } finally {
       setLoading(false);
     }
@@ -196,6 +175,10 @@ const SignUpScreen = () => {
           <Text style={styles.link}>Privacy Policy</Text>
         </Text>
 
+        {error ? (
+          <Text style={styles.errorText}>{error}</Text>
+        ) : null}
+
         <TouchableOpacity 
           style={[styles.signUpButton, loading && styles.signUpButtonDisabled]} 
           onPress={handleSignUp}
@@ -295,6 +278,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  errorText: {
+    color: '#ff3b30',
+    textAlign: 'center',
+    marginBottom: 16,
+    fontSize: 14,
   },
   modalOverlay: {
     flex: 1,

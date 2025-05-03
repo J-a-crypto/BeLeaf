@@ -6,7 +6,7 @@ const LandingPage: React.FC = () => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>dashboard</Text>
-      </View>
+        </View>
     </SafeAreaView>
   );
 };
